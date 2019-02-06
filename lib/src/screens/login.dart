@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
+import '../utils/validators.dart';
 import 'dart:ui';
 
 
 class LoginScreen extends StatelessWidget {
+  //  _formKey and _autoValidate
+  static final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  bool _autoValidate = false;
+  String _email;
+  String _password;
+
+
   void _navigate(BuildContext context, String path) {
     Navigator.pushReplacementNamed(context, path);
   }
 
   @override
   Widget build(BuildContext context) {
+
     final logo = Hero(
       tag: 'hero',
       child: CircleAvatar(
@@ -18,10 +27,28 @@ class LoginScreen extends StatelessWidget {
       ),
     );
 
+
+    void _validateInputs() {
+      if (_formKey.currentState.validate()) {
+//    If all data are correct then save data to out variables
+        _formKey.currentState.save();
+        _autoValidate = false;
+        print(_email);
+        print(_password);
+        _navigate(context, '/home');
+      } else {
+//      If all data are not valid then start auto validation.
+        _autoValidate = true;
+      }
+    }
+
     final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
       autofocus: false,
-      initialValue: 'saikat@itobuz.com',
+      validator: validateEmail,
+      onSaved: (String val) {
+        _email = val;
+      },
       decoration: InputDecoration(
         hintText: 'Email',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -31,8 +58,10 @@ class LoginScreen extends StatelessWidget {
 
     final password = TextFormField(
       autofocus: false,
-      initialValue: '12345',
       obscureText: true,
+      onSaved: (String val) {
+        _password = val;
+      },
       decoration: InputDecoration(
         hintText: 'Password',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -46,9 +75,7 @@ class LoginScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
-        onPressed: () {
-          _navigate(context, '/home');
-        },
+        onPressed: _validateInputs,
         padding: EdgeInsets.all(12),
         color: Colors.lightBlueAccent,
         child: Text('Log In', style: TextStyle(color: Colors.white)),
@@ -66,6 +93,9 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
+        child: new Form(
+        key: _formKey,
+        autovalidate: _autoValidate,
         child: ListView(
           shrinkWrap: true,
           padding: EdgeInsets.only(left: 24.0, right: 24.0),
@@ -80,6 +110,7 @@ class LoginScreen extends StatelessWidget {
             forgotLabel
           ],
         ),
+      ),
       ),
     );
   }
